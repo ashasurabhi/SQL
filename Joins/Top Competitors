@@ -1,0 +1,27 @@
+WITH T AS (
+    SELECT 
+        s.hacker_id,
+        s.challenge_id,
+        s.score AS Hacker_Score,
+        d.score AS challenge_score,
+        COUNT(s.hacker_id) OVER (PARTITION BY s.hacker_id) AS more_than_one
+    FROM 
+        submissions s
+    JOIN 
+        challenges c ON s.challenge_id = c.challenge_id
+    JOIN 
+        Difficulty d ON d.difficulty_level = c.difficulty_level
+    WHERE 
+        s.score = d.score
+)
+SELECT 
+    T.hacker_id,
+    H.name
+FROM 
+    T
+JOIN 
+    Hackers H ON T.hacker_id = H.hacker_id AND T.more_than_one > 1
+GROUP BY 
+    T.hacker_id, H.name
+ORDER BY 
+    COUNT(T.hacker_id) DESC, T.hacker_id ASC;
