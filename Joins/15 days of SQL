@@ -1,0 +1,42 @@
+with t1 as (select distinct submission_date,
+           hacker_id,
+            min(submission_date)over() as start_date,
+           1 as dummy
+           from submissions),
+uniquecount as (
+select
+t2.submission_date,
+count(distinct t2.hacker_id) uniquehackers
+from 
+(
+Select t1.submission_date,
+t1.hacker_id,
+t1.start_date,
+sum(dummy)over(partition by t1.hacker_id order by t1.submission_date) as runningsum
+from t1
+) t2
+where t2.runningsum-1=datediff( day,t2.start_date, t2.submission_date)
+group by t2.submission_date),
+
+HackerMax as
+(select  s.submission_date,
+s.hacker_id,
+ h.name,
+  row_number() over (partition by s.submission_date order by count(*) desc , s.hacker_id asc) as rownumber
+from submissions s
+ join hackers h on s.hacker_id=h.hacker_id
+group by 
+ s.submission_date,
+ s.hacker_id,
+ h.name
+)
+
+
+select uc.submission_date,
+uc.uniquehackers,
+hm.hacker_id,
+hm.name
+from uniquecount uc
+join HackerMax  hm on uc.submission_date=hm.submission_date and hm.rownumber=1
+
+
