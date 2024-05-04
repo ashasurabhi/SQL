@@ -1,0 +1,12 @@
+select
+studentname
+from(
+Select s. id student,
+s.name studentname,
+(select salary from packages where id=s.id) studentsalary,
+f.friend_id as friend,
+(select salary from packages where id=f.friend_id) as friendsalary
+from students s join
+friends f on s.id=f.id) as A
+where friendsalary>studentsalary
+order by friendsalary
