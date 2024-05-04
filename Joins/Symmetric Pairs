@@ -1,0 +1,16 @@
+
+select *
+from 
+(select f. x , f.y from functions f, functions b
+where f.x  =b.y 
+and f.y =b.x
+and f.x<f.y
+
+union 
+select x,y
+from functions
+where x=y
+group by x,y
+having count(*) >1) as A
+
+order by x
